@@ -181,5 +181,40 @@ void NFA::makeUnion(const NFA& n)
     Q += n.Q + 1;
 }
 
-//void makeConcatenation(const NFA& n);
-//void makeStar(void);
+void NFA::makeConcatenation(const NFA& n)
+{
+    for (const auto& state: acceptStates) {
+//        if (!delta[state].contains(EPSILON)) {
+//            delta[state][EPSILON] = {};
+//        }
+        delta[state][EPSILON].insert(n.startState + Q);
+    }
+    unordered_map<NFASymbol, unordered_set<NFAState>> tempMap;
+    unordered_set<NFAState> tempSet;
+    for (const auto& map : n.delta) {
+        for (const auto& pair : map) {
+            for (const auto& state : pair.second) {
+                tempSet.insert(state + Q);
+            }
+            tempMap[pair.first] = tempSet;
+            tempSet.clear();
+        }
+        delta.push_back(tempMap);
+        tempMap.clear();
+    }
+
+    unordered_set<NFAState> newAcceptStates;
+    for (const auto& state: n.acceptStates) {
+        newAcceptStates.insert(state + Q);
+    }
+    acceptStates = newAcceptStates;
+
+    Q += n.Q;
+}
+
+void NFA::makeStar(void)
+{
+    for (const auto& state: acceptStates) {
+        delta[state][EPSILON].insert(startState);
+    }
+}
