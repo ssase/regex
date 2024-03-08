@@ -7,9 +7,12 @@
 
 #include "NFA.hpp"
 
-const unordered_set<NFAState>& NFA::receive(const NFAState currentState, const NFASymbol symbol)
+const unordered_set<NFAState> NFA::receive(const NFAState currentState, const NFASymbol symbol)
 {
-    return delta[currentState][symbol];
+    if (delta.size() > currentState && delta[currentState].contains(symbol)) {
+        return delta[currentState][symbol];
+    }
+    return {};
 }
 
 bool NFA::isStartState(NFAState state)
@@ -42,7 +45,7 @@ unordered_set<NFAState> NFA::collectEmptyCharReachableStates(unordered_set<NFASt
     while (!states.empty()) {
         auto header = states.begin();
         while (header != states.end()) {
-            const unordered_set<NFAState>& tempResult = delta[*header][EPSILON];
+            const unordered_set<NFAState> tempResult = receive(*header, EPSILON);
             temp.insert(tempResult.begin(), tempResult.end());
             header++;
         }
@@ -65,6 +68,8 @@ vector<Substring> NFA::parseString(const string& str)
     vector<Substring> result;
     // and `matchedSubstring` stores substring that is being analysed.
     pair<string::const_iterator, unsigned int> matchedSubstring{str.begin(), NothingMatched};
+
+    unordered_set<NFAState> deltaResult;
 
     // Although there is only one start state, but we should also consider ε(aka empty string), this will store the start states after considering empty string reachability.
     unordered_set<NFAState> startStates{startState};
@@ -94,7 +99,7 @@ vector<Substring> NFA::parseString(const string& str)
     while (parser < str.end()) {
 
         for (const auto& state : parsingStartStates) {
-            const unordered_set<NFAState> &deltaResult = receive(state, *parser);
+            deltaResult = receive(state, *parser);
             tempStates.insert(deltaResult.begin(), deltaResult.end());
         }
         emptyReachableStates = collectEmptyCharReachableStates(tempStates);

@@ -28,11 +28,11 @@ class NFA
 
 private:
     NFAState Q; // Due to all the states are numbers, we can use the count of states to represent all possible states, and the range is 0-(Q-1).
-    vector<unordered_map<NFASymbol, unordered_set<NFAState>>> delta; // The transition function running like this: nextStates = delta[currentState][receivedSymbol]
+    vector<unordered_map<NFASymbol, unordered_set<NFAState>>> delta; // The transition function running like this: nextStates = delta[currentState][receivedSymbol], user should use receive() instead
     NFAState startState; // Normaly 0
     unordered_set<NFAState> acceptStates;
 
-    const unordered_set<NFAState>& receive(const NFAState currentState, const NFASymbol symbol);
+    const unordered_set<NFAState> receive(const NFAState currentState, const NFASymbol symbol);
     bool isStartState(const NFAState state);
     bool isAcceptState(const NFAState state);
     bool containAcceptStates(const unordered_set<NFAState>& states);
