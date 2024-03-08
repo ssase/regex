@@ -142,3 +142,44 @@ vector<Substring> NFA::parseString(const string& str)
 
     return result;
 }
+
+void NFA::makeUnion(const NFA& n)
+{
+    startState = 0;
+
+    unordered_set<NFAState> newAcceptStates;
+    for (const auto& state: acceptStates) {
+        newAcceptStates.insert(state + 1);
+    }
+    for (const auto& state: n.acceptStates) {
+        newAcceptStates.insert(state + 1 + Q);
+    }
+    acceptStates = newAcceptStates;
+
+    vector<unordered_map<NFASymbol, unordered_set<NFAState>>> newDelta;
+    unordered_map<NFASymbol, unordered_set<NFAState>> tempMap;
+    unordered_set<NFAState> tempSet;
+    newDelta.push_back({{EPSILON, {startState + 1, n.startState + 1 + Q}}});
+
+    const vector<unordered_map<NFASymbol, unordered_set<NFAState>>> * deltas[] = {&delta, &n.delta};
+    const NFAState addons[] = {1, Q + 1};
+    for (int i = 0; i < 2; i++) {
+        for (const auto& map : *(deltas[i])) {
+            for (const auto& pair : map) {
+                for (const auto& state : pair.second) {
+                    tempSet.insert(state + addons[i]);
+                }
+                tempMap[pair.first] = tempSet;
+                tempSet.clear();
+            }
+            newDelta.push_back(tempMap);
+            tempMap.clear();
+        }
+    }
+    delta = newDelta;
+
+    Q += n.Q + 1;
+}
+
+//void makeConcatenation(const NFA& n);
+//void makeStar(void);
