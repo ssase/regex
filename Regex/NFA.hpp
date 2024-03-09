@@ -42,7 +42,10 @@ private:
 public:
     static const NFASymbol EPSILON; // To indicate an empty symbol.
 
+    NFA(): NFA(0, 0, {}, {}){}
     NFA(const NFAState Q, const NFAState startState, const unordered_set<NFAState> acceptStates, vector<unordered_map<NFASymbol, unordered_set<NFAState>>> delta): Q(Q), startState(startState), acceptStates(acceptStates), delta(delta){}
+    NFA(const NFASymbol specialSymbol);
+
     vector<Substring> parseString(const string& str);
 
     void makeUnion(const NFA& n);

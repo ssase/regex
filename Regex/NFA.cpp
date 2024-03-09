@@ -57,6 +57,35 @@ unordered_set<NFAState> NFA::collectEmptyCharReachableStates(unordered_set<NFASt
     return result;
 }
 
+NFA::NFA(const NFASymbol specialSymbol)
+{
+    if ((specialSymbol >= 'a' && specialSymbol <= 'z') || (specialSymbol >= 'A' && specialSymbol <= 'Z')) {
+        Q = 2;
+        startState = 0;
+        acceptStates = {1};
+        delta = {
+            {{specialSymbol, {1}}},
+            {}
+        };
+    } else if (specialSymbol == '.') {
+        Q = 2;
+        startState = 0;
+        acceptStates = {1};
+        delta = {
+            {},
+            {}
+        };
+        for (char c = 'a'; c <= 'z'; c++) {
+            delta[0][c] = {1};
+        }
+    } else {
+        Q = 0;
+        startState = 0;
+        acceptStates = {};
+        delta = {};
+    }
+}
+
 const NFASymbol NFA::EPSILON = -1; // We use it as an ε which means empty symbol in an NFA.
 
 vector<Substring> NFA::parseString(const string& str)
@@ -91,7 +120,7 @@ vector<Substring> NFA::parseString(const string& str)
     startStates.insert(emptyReachableStates.begin(), emptyReachableStates.end());
     // To find out if the NFA accepts empty string.
     if (containAcceptStates(startStates)) {
-        result.push_back({0, 0});
+        matchedSubstring.second = 0;
     }
 
     parsingStartStates = startStates;
@@ -145,6 +174,12 @@ vector<Substring> NFA::parseString(const string& str)
 
 void NFA::makeUnion(const NFA& n)
 {
+    if (n.Q == 0) { return;}
+    if (Q == 0) {
+        *this = n;
+        return;
+    }
+
     startState = 0;
 
     unordered_set<NFAState> newAcceptStates;
@@ -183,10 +218,13 @@ void NFA::makeUnion(const NFA& n)
 
 void NFA::makeConcatenation(const NFA& n)
 {
+    if (n.Q == 0) { return;}
+    if (Q == 0) {
+        *this = n;
+        return;
+    }
+
     for (const auto& state: acceptStates) {
-//        if (!delta[state].contains(EPSILON)) {
-//            delta[state][EPSILON] = {};
-//        }
         delta[state][EPSILON].insert(n.startState + Q);
     }
     unordered_map<NFASymbol, unordered_set<NFAState>> tempMap;
@@ -214,7 +252,10 @@ void NFA::makeConcatenation(const NFA& n)
 
 void NFA::makeStar(void)
 {
+    if (Q == 0) { return; }
+
     for (const auto& state: acceptStates) {
         delta[state][EPSILON].insert(startState);
     }
+    acceptStates = {startState};
 }
