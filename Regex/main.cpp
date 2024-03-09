@@ -12,37 +12,7 @@ class Solution {
 public:
     bool isMatch(string s, string p) {
 
-        NFA n{};
-        NFA n1;
-        NFA m{'.'};
-
-        char t = '*';
-
-        for (auto i = p.begin(); i <= p.end(); i++) {
-
-            if (t != '*') {
-
-                if (t == '.') {
-                    n1 = m;
-
-                } else {
-
-                    n1 = NFA(2, 0, {1}, {
-                        {{t, {1}}},
-                        {},
-                    });
-                }
-
-                if (*i == '*') {
-                    n1.makeStar();
-                }
-
-                n.makeConcatenation(n1);
-            }
-
-            t = *i;
-        }
-
+        NFA n = NFA(p);
         vector<Substring> res = n.parseString(s);
 
         return !res.empty() && res[0].second == s.size();

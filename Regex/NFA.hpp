@@ -45,6 +45,7 @@ public:
     NFA(): NFA(0, 0, {}, {}){}
     NFA(const NFAState Q, const NFAState startState, const unordered_set<NFAState> acceptStates, vector<unordered_map<NFASymbol, unordered_set<NFAState>>> delta): Q(Q), startState(startState), acceptStates(acceptStates), delta(delta){}
     NFA(const NFASymbol specialSymbol);
+    NFA(const string pattern); // Init an NFA with a regex
 
     vector<Substring> parseString(const string& str);
 

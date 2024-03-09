@@ -86,6 +86,40 @@ NFA::NFA(const NFASymbol specialSymbol)
     }
 }
 
+NFA::NFA(const string pattern)
+{
+    *this = NFA{};
+    NFA n1;
+    NFA m{'.'};
+
+    char t = '*';
+
+    for (auto i = pattern.begin(); i <= pattern.end(); i++) {
+
+        if (t != '*') {
+
+            if (t == '.') {
+                n1 = m;
+
+            } else {
+
+                n1 = NFA(2, 0, {1}, {
+                    {{t, {1}}},
+                    {},
+                });
+            }
+
+            if (*i == '*') {
+                n1.makeStar();
+            }
+
+            this->makeConcatenation(n1);
+        }
+
+        t = *i;
+    }
+}
+
 const NFASymbol NFA::EPSILON = -1; // We use it as an ε which means empty symbol in an NFA.
 
 vector<Substring> NFA::parseString(const string& str)
@@ -141,7 +175,6 @@ vector<Substring> NFA::parseString(const string& str)
         if (splitedNFAStates.empty()) {
 
             if (parsingStartStates == startStates) {
-                printf("\n======== parser++\n");
                 parser++;
 
             } else {
@@ -155,7 +188,6 @@ vector<Substring> NFA::parseString(const string& str)
 
         } else {
 
-            printf("\n======== parser++\n");
             parser++;
             parsingStartStates = splitedNFAStates;
 
