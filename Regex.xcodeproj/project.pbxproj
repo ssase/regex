@@ -9,6 +9,9 @@
 /* Begin PBXBuildFile section */
 		392E21E12B9AA535003FD741 /* main.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 392E21E02B9AA535003FD741 /* main.cpp */; };
 		392E21E92B9AA67B003FD741 /* NFA.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 392E21E72B9AA67B003FD741 /* NFA.cpp */; };
+		392E22022B9FE64E003FD741 /* DFA.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 392E22002B9FE64E003FD741 /* DFA.cpp */; };
+		392E220B2BA1B699003FD741 /* FA.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 392E22092BA1B699003FD741 /* FA.cpp */; };
+		392E220E2BA711F4003FD741 /* BitNumber.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 392E220C2BA711F4003FD741 /* BitNumber.cpp */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXCopyFilesBuildPhase section */
@@ -28,6 +31,13 @@
 		392E21E02B9AA535003FD741 /* main.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = main.cpp; sourceTree = "<group>"; };
 		392E21E72B9AA67B003FD741 /* NFA.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = NFA.cpp; sourceTree = "<group>"; };
 		392E21E82B9AA67B003FD741 /* NFA.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = NFA.hpp; sourceTree = "<group>"; };
+		392E22002B9FE64E003FD741 /* DFA.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = DFA.cpp; sourceTree = "<group>"; };
+		392E22012B9FE64E003FD741 /* DFA.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = DFA.hpp; sourceTree = "<group>"; };
+		392E22092BA1B699003FD741 /* FA.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = FA.cpp; sourceTree = "<group>"; };
+		392E220A2BA1B699003FD741 /* FA.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = FA.hpp; sourceTree = "<group>"; };
+		392E220C2BA711F4003FD741 /* BitNumber.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = BitNumber.cpp; sourceTree = "<group>"; };
+		392E220D2BA711F4003FD741 /* BitNumber.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = BitNumber.hpp; sourceTree = "<group>"; };
+		392E220F2BABBDE6003FD741 /* HashValue.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = HashValue.h; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -60,8 +70,15 @@
 		392E21DF2B9AA535003FD741 /* Regex */ = {
 			isa = PBXGroup;
 			children = (
+				392E220F2BABBDE6003FD741 /* HashValue.h */,
+				392E220D2BA711F4003FD741 /* BitNumber.hpp */,
+				392E220C2BA711F4003FD741 /* BitNumber.cpp */,
+				392E220A2BA1B699003FD741 /* FA.hpp */,
+				392E22092BA1B699003FD741 /* FA.cpp */,
 				392E21E82B9AA67B003FD741 /* NFA.hpp */,
 				392E21E72B9AA67B003FD741 /* NFA.cpp */,
+				392E22012B9FE64E003FD741 /* DFA.hpp */,
+				392E22002B9FE64E003FD741 /* DFA.cpp */,
 				392E21E02B9AA535003FD741 /* main.cpp */,
 			);
 			path = Regex;
@@ -124,7 +141,10 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				392E22022B9FE64E003FD741 /* DFA.cpp in Sources */,
 				392E21E12B9AA535003FD741 /* main.cpp in Sources */,
+				392E220B2BA1B699003FD741 /* FA.cpp in Sources */,
+				392E220E2BA711F4003FD741 /* BitNumber.cpp in Sources */,
 				392E21E92B9AA67B003FD741 /* NFA.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;

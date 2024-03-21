@@ -8,50 +8,56 @@
 #ifndef NFA_hpp
 #define NFA_hpp
 
-#include <string>
-#include <vector>
-#include <unordered_set>
-#include <unordered_map>
+#include "FA.hpp"
 
-using std::string;
-using std::vector;
-using std::unordered_set;
-using std::unordered_map;
-using std::pair;
-
-typedef unsigned int NFAState;
-typedef unsigned int NFASymbol;
-typedef pair<unsigned int, unsigned int> Substring; // pair.first means the position of string head, and pair.second means the length of string
-
-class NFA
+namespace FAS
 {
 
+class DFA;
+
+class NFA: public FA
+{
 private:
-    NFAState Q; // Due to all the states are numbers, we can use the count of states to represent all possible states, and the range is 0-(Q-1).
-    vector<unordered_map<NFASymbol, unordered_set<NFAState>>> delta; // The transition function running like this: nextStates = delta[currentState][receivedSymbol], user should use receive() instead
-    NFAState startState; // Normaly 0
-    unordered_set<NFAState> acceptStates;
 
-    const unordered_set<NFAState> receive(const NFAState currentState, const NFASymbol symbol);
-    bool isStartState(const NFAState state);
-    bool isAcceptState(const NFAState state);
-    bool containAcceptStates(const unordered_set<NFAState>& states);
+    static const FASymbol EPSILON; // To indicate an empty symbol.
 
-    unordered_set<NFAState> collectEmptyCharReachableStates(unordered_set<NFAState> states);
+    unordered_set<FAState> currentStates;
+    vector<unordered_map<FASymbol, unordered_set<FAState>>> transition;
+
+    unordered_set<FAState> collectEmptySymbolReachableStates(unordered_set<FAState> states) const;
+
+    // Although there is only one start state, but we should also consider ε(aka empty string), this will help set currentStates with startState after considering empty string reachability.
+    void calculateCurrentStates(void);
+
+protected:
+
+    const unordered_set<FAState> transitResult(FAState state, FASymbol symbol) const;
+    const unordered_set<FAState> transitResult(unordered_set<FAState> states, FASymbol symbol) const;
+
+    void simplify(void) override;
+    void completeChanging(void) override;
 
 public:
-    static const NFASymbol EPSILON; // To indicate an empty symbol.
 
-    NFA(): NFA(0, 0, {}, {}){}
-    NFA(const NFAState Q, const NFAState startState, const unordered_set<NFAState> acceptStates, vector<unordered_map<NFASymbol, unordered_set<NFAState>>> delta): Q(Q), startState(startState), acceptStates(acceptStates), delta(delta){}
-    NFA(const NFASymbol specialSymbol);
-    NFA(const string pattern); // Init an NFA with a regex
+    friend class DFA;
 
-    vector<Substring> parseString(const string& str);
+    NFA();
+    NFA(const FAState states, const FAState startState, const unordered_set<FAState>& acceptStates, const vector<unordered_map<FASymbol, unordered_set<FAState>>>& transition);
+    NFA(const FAState states, const vector<pair<FASymbol, FASymbol>>& symbols, const FAState startState, const unordered_set<FAState>& acceptStates, const vector<unordered_map<FASymbol, unordered_set<FAState>>>& transition);
+    NFA(const FASymbol specialSymbol);
+    // Init an NFA with a regex
+    NFA(const string pattern);
+
+    NFA(const DFA& d);
+
+    void receive(const FASymbol symbol) override;
+    virtual vector<Substring> recognize(const string& str) override;
 
     void makeUnion(const NFA& n);
     void makeConcatenation(const NFA& n);
     void makeStar(void);
+
 };
 
+}
 #endif /* NFA_hpp */
