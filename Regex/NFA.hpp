@@ -45,9 +45,10 @@ public:
     NFA(const FAState states, const vector<pair<FASymbol, FASymbol>>& symbols, const FAState startState, const unordered_set<FAState>& acceptStates, const vector<unordered_map<FASymbol, unordered_set<FAState>>>& transition);
     NFA(const FASymbol specialSymbol);
     // Init an NFA with a regex
-    NFA(const string pattern);
+    NFA(const string& pattern);
 
     NFA(const DFA& d);
+    NFA(const DFA&& d);
 
     // Before using this, make sure the `currentStates` is what you need. Call `resetCurrentStates` if you want to begin from `startState`.
     void receive(const FASymbol symbol) override;

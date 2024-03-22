@@ -33,15 +33,15 @@ namespace std {
     };
 }
 
-FAState DFA::transitResult(FAState state, FASymbol symbol)
+FAState DFA::transitResult(const FAState state, const FASymbol symbol) const
 {
     if (state < 0 || state >= states) { return StateNotFound; }
     auto& map = transition[state];
     if (!map.contains(symbol)) { return StateNotFound; }
-    return map[symbol];
+    return map.at(symbol);
 }
 
-bool DFA::isTerminalState(FAState state)
+bool DFA::isTerminalState(const FAState state) const
 {
     return terminalStates.contains(state);
 }
@@ -84,7 +84,9 @@ DFA::DFA(const FAState states, const vector<pair<FASymbol, FASymbol>>& symbols, 
     calculateTerminalStates();
 }
 
-DFA::DFA(const NFA& n)
+DFA::DFA(const NFA& n): DFA(std::move(n)) {}
+
+DFA::DFA(const NFA&& n)
 {
     symbols = n.symbols;
     startState = 0;
@@ -135,7 +137,7 @@ DFA::DFA(const NFA& n)
                 tempMap[j] = stateMap[tempTransition[i][j]];
             }
         }
-        transition.push_back(tempMap);
+        transition.emplace_back(tempMap);
         tempMap.clear();
     }
 
@@ -307,7 +309,7 @@ void DFA::simplify(void)
 
     transition.clear();
     for (int i = 0; i < currentStateCount; i++) {
-        transition.push_back(tempTransition[i]);
+        transition.emplace_back(tempTransition[i]);
     }
 
     calculateTerminalStates();

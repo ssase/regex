@@ -5,6 +5,8 @@
 //  Created by Min on 2024/3/8.
 //
 
+#include <algorithm>
+
 #include "NFA.hpp"
 #include "DFA.hpp"
 
@@ -82,12 +84,10 @@ NFA::NFA(const FASymbol specialSymbol): NFA()
             transition[0][c] = {1};
         }
     }
-
-    simplify();
 }
 
 // Init an NFA with a regex
-NFA::NFA(const string pattern): NFA()
+NFA::NFA(const string& pattern): NFA()
 {
     NFA n;
 
@@ -118,17 +118,40 @@ NFA::NFA(const string pattern): NFA()
     simplify();
 }
 
-NFA::NFA(const DFA& d)
+NFA::NFA(const DFA& d): NFA(std::move(d)) {}
+
+NFA::NFA(const DFA&& d)
 {
     states = d.states - (FAState)d.terminalStates.size();
     symbols = d.symbols;
-    startState = d.startState;
-    acceptStates = d.acceptStates;
-    transition = vector<unordered_map<FASymbol, unordered_set<FAState>>>(d.transition.size(), unordered_map<FASymbol, unordered_set<FAState>>());
-    for (int i = 0; i < transition.size(); i++) {
-        for (auto it = d.transition[i].begin(); it != d.transition[i].end(); it++) {
-            transition[i][it->first] = {it->second};
+    acceptStates = {};
+    transition = {};
+
+    vector<FAState> newStatesMap(d.states);
+    vector<FAState> dterminal{d.terminalStates.begin(), d.terminalStates.end()};
+    std::sort(dterminal.begin(), dterminal.end());
+
+    for (FAState i = 0; i < d.states; i++) {
+        newStatesMap[i] = i - (FAState)(std::lower_bound(dterminal.begin(), dterminal.end(), i) - dterminal.begin());
+    }
+
+    unordered_map<FASymbol, unordered_set<FAState>> tempMap = {};
+
+    for (int i = 0; i < d.states; i++) {
+        if (!d.isTerminalState(i)) {
+            for (auto it = d.transition[i].begin(); it != d.transition[i].end(); it++) {
+                if (!d.isTerminalState(it->second)) {
+                    tempMap[it->first] = {newStatesMap[it->second]};
+                }
+            }
+            transition.emplace_back(tempMap);
+            tempMap.clear();
         }
+    }
+
+    startState = newStatesMap[d.startState];
+    for (auto s: d.acceptStates) {
+        acceptStates.insert(newStatesMap[s]);
     }
 }
 
@@ -237,7 +260,7 @@ void NFA::makeUnion(const NFA& n)
                 tempMap[pair.first] = tempSet;
                 tempSet.clear();
             }
-            newTransition.push_back(tempMap);
+            newTransition.emplace_back(tempMap);
             tempMap.clear();
         }
     }
@@ -269,7 +292,7 @@ void NFA::makeConcatenation(const NFA& n)
             tempMap[pair.first] = tempSet;
             tempSet.clear();
         }
-        transition.push_back(tempMap);
+        transition.emplace_back(tempMap);
         tempMap.clear();
     }
 
@@ -301,7 +324,6 @@ void NFA::resetCurrentStates(void)
 
 void NFA::simplify(void)
 {
-    DFA d = DFA(*this);
-    *this = NFA(d);
+    *this = DFA(*this);
 }
 

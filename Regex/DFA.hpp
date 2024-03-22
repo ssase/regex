@@ -24,14 +24,14 @@ private:
 
     FAState currentState;
     vector<unordered_map<FASymbol, FAState>> transition;
-    unordered_set<FAState> terminalStates = {}; // for any t in terminalStates and all s in symbols, transition[t][s] == t
+    unordered_set<FAState> terminalStates = {}; // for any t in `terminalStates` and all s in `symbols`, `transition`[t][s] == t and t not in `acceptStates`.
 
     void resetCurrentState(void);
 
 protected:
 
-    FAState transitResult(FAState state, FASymbol symbol);
-    bool isTerminalState(FAState state);
+    FAState transitResult(const FAState state, const FASymbol symbol) const;
+    bool isTerminalState(const FAState state) const;
     void calculateTerminalStates(void);
 
     void simplify(void) override;
@@ -45,6 +45,7 @@ public:
     //    DFA(const FASymbol specialSymbol);
     //    DFA(const string pattern); // Init a DFA with a regex
     DFA(const NFA& n);
+    DFA(const NFA&& n);
 
     // Before using this, make sure the `currentState` is what you need. Call `resetCurrentState` if you want to begin from `startState`.
     void receive(const FASymbol symbol) override;

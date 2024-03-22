@@ -33,6 +33,11 @@ public:
 int main(int argc, const char * argv[]) {
     // insert code here...
 
+    NFA n = NFA("a*");
+    bool cv = n.recognize("aa");
+
+
+
     NFA n1 = NFA(2, {{'a', 'b'}}, 0, {1}, {
         {{'a', {1}}},
         {},
