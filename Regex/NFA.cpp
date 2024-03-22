@@ -56,13 +56,9 @@ const FASymbol NFA::EPSILON = -1; // We use it as an ε which means empty symbol
 
 NFA::NFA(): NFA(0, 0, {}, {{}}) {}
 
-NFA::NFA(const FAState states, const FAState startState, const unordered_set<FAState>& acceptStates, const vector<unordered_map<FASymbol, unordered_set<FAState>>>& transition): FA(states, startState, acceptStates), transition(transition) {
-    calculateCurrentStates();
-}
+NFA::NFA(const FAState states, const FAState startState, const unordered_set<FAState>& acceptStates, const vector<unordered_map<FASymbol, unordered_set<FAState>>>& transition): FA(states, startState, acceptStates), transition(transition) {}
 
-NFA::NFA(const FAState states, const vector<pair<FASymbol, FASymbol>>& symbols, const FAState startState, const unordered_set<FAState>& acceptStates, const vector<unordered_map<FASymbol, unordered_set<FAState>>>& transition): FA(states, symbols, startState, acceptStates), transition(transition) {
-    calculateCurrentStates();
-}
+NFA::NFA(const FAState states, const vector<pair<FASymbol, FASymbol>>& symbols, const FAState startState, const unordered_set<FAState>& acceptStates, const vector<unordered_map<FASymbol, unordered_set<FAState>>>& transition): FA(states, symbols, startState, acceptStates), transition(transition) {}
 
 NFA::NFA(const FASymbol specialSymbol): NFA()
 {
@@ -87,7 +83,7 @@ NFA::NFA(const FASymbol specialSymbol): NFA()
         }
     }
 
-    completeChanging();
+    simplify();
 }
 
 // Init an NFA with a regex
@@ -119,12 +115,12 @@ NFA::NFA(const string pattern): NFA()
         t = *i;
     }
 
-    completeChanging();
+    simplify();
 }
 
 NFA::NFA(const DFA& d)
 {
-    states = d.states;
+    states = d.states - (FAState)d.terminalStates.size();
     symbols = d.symbols;
     startState = d.startState;
     acceptStates = d.acceptStates;
@@ -134,8 +130,6 @@ NFA::NFA(const DFA& d)
             transition[i][it->first] = {it->second};
         }
     }
-
-    calculateCurrentStates();
 }
 
 void NFA::receive(const FASymbol symbol)
@@ -143,8 +137,19 @@ void NFA::receive(const FASymbol symbol)
     currentStates = collectEmptySymbolReachableStates(transitResult(currentStates, symbol));
 }
 
-vector<Substring> NFA::recognize(const string& str)
+bool NFA::recognize(const string &str)
 {
+    resetCurrentStates();
+    for (auto it = str.begin(); it != str.end(); it++) {
+        receive(*it);
+    }
+    return containAcceptStates(currentStates);
+}
+
+vector<Substring> NFA::findRecognizedSubstrings(const string& str)
+{
+    resetCurrentStates();
+
     const unsigned int NothingMatched = -1;
 
     // `pair.first` means the first location of matched substring in the string, and `pair.second` means the length.
@@ -240,7 +245,7 @@ void NFA::makeUnion(const NFA& n)
 
     states += n.states + 1;
 
-    completeChanging();
+    simplify();
 }
 
 void NFA::makeConcatenation(const NFA& n)
@@ -276,7 +281,7 @@ void NFA::makeConcatenation(const NFA& n)
 
     states += n.states;
 
-    completeChanging();
+    simplify();
 }
 
 void NFA::makeStar(void)
@@ -287,11 +292,9 @@ void NFA::makeStar(void)
         transition[state][EPSILON].insert(startState);
     }
     acceptStates = {startState};
-
-    calculateCurrentStates();
 }
 
-void NFA::calculateCurrentStates(void)
+void NFA::resetCurrentStates(void)
 {
     currentStates = collectEmptySymbolReachableStates({startState});
 }
@@ -302,8 +305,3 @@ void NFA::simplify(void)
     *this = NFA(d);
 }
 
-void NFA::completeChanging(void)
-{
-    simplify();
-    calculateCurrentStates();
-}

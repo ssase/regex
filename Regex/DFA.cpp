@@ -50,22 +50,24 @@ void DFA::calculateTerminalStates(void)
 {
     terminalStates = {};
     bool need;
-    for (FAState s = 0; s < transition.size(); s++) {
-        const auto& map = transition[s];
-        need = true;
-        for (auto symbolRange: symbols) {
-            for (auto i = symbolRange.first; i <= symbolRange.second; i++) {
-                if (map.at(i) != s) {
-                    need = false;
+    for (FAState s = 0; s < states; s++) {
+        if (!isAcceptState(s)) {
+            const auto& map = transition[s];
+            need = true;
+            for (auto symbolRange: symbols) {
+                for (auto i = symbolRange.first; i <= symbolRange.second; i++) {
+                    if (map.at(i) != s) {
+                        need = false;
+                        break;
+                    }
+                }
+                if (!need) {
                     break;
                 }
             }
-            if (!need) {
-                break;
+            if (need) {
+                terminalStates.insert(s);
             }
-        }
-        if (need) {
-            terminalStates.insert(s);
         }
     }
 }
@@ -139,7 +141,7 @@ DFA::DFA(const NFA& n)
 
     states = (FAState)transition.size();
 
-    completeChanging();
+    simplify();
 }
 
 void DFA::receive(const FASymbol symbol)
@@ -147,8 +149,19 @@ void DFA::receive(const FASymbol symbol)
     currentState = transitResult(currentState, symbol);
 }
 
-vector<Substring> DFA::recognize(const string& str)
+bool DFA::recognize(const string& str)
 {
+    resetCurrentState();
+    for (auto it = str.begin(); it != str.end(); it++) {
+        receive(*it);
+    }
+    return isAcceptState(currentState);
+}
+
+vector<Substring> DFA::findRecognizedSubstrings(const string& str)
+{
+    resetCurrentState();
+
     const unsigned int NothingMatched = -1;
 
     // `pair.first` means the first location of matched substring in the string, and `pair.second` means the length.
@@ -233,15 +246,16 @@ void DFA::makeStar(void)
 void DFA::simplify(void)
 {
     vector<StateGroupInfo> groups = vector<StateGroupInfo>(states, StateGroupInfo{0, 0});
+    FAState acceptStatesGroupNum = acceptStates.size() == states ? 0 : 1;
     for (FAState s = 0; s < states; s++) {
         if (isAcceptState(s)) {
-            groups[s].groupNum = 1;
+            groups[s].groupNum = acceptStatesGroupNum;
         }
     }
 
     unordered_map<StateGroupInfo, FAState> newStateGroupMap;
     FAState resState;
-    FAState currentStateCount = 2;
+    FAState currentStateCount = acceptStatesGroupNum + 1;
 
     for (int i = 0; i < symbols.size(); i++) {
 
@@ -282,7 +296,7 @@ void DFA::simplify(void)
         }
         for (FASymbol j = 0; j < symbols.size(); j++) {
             for (FASymbol symbol = symbols[j].first; symbol <= symbols[j].second; symbol++) {
-                tempTransition[groups[i].groupNum][symbol] = transition[i][symbol];
+                tempTransition[groups[i].groupNum][symbol] = groups[transition[i][symbol]].groupNum;
             }
         }
     }
@@ -299,8 +313,7 @@ void DFA::simplify(void)
     calculateTerminalStates();
 }
 
-
-void DFA::completeChanging(void)
+void DFA::resetCurrentState(void)
 {
-    simplify();
+    currentState = startState;
 }

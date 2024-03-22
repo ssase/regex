@@ -37,7 +37,6 @@ protected:
     unordered_set<FAState> acceptStates; // Make sure being different from each other
 
     virtual void simplify(void);
-    virtual void completeChanging(void);
 
 public:
     
@@ -46,7 +45,8 @@ public:
     FA(const FAState states, const vector<pair<FASymbol, FASymbol>>& symbols, const FAState startState, const unordered_set<FAState>& acceptStates);
 
     virtual void receive(const FASymbol symbol);
-    virtual vector<Substring> recognize(const string& str);
+    virtual bool recognize(const string& str);
+    virtual vector<Substring> findRecognizedSubstrings(const string& str);
 
     bool isSymbolInRange(const FASymbol symbol) const;
     bool isStartState(const FAState state) const;

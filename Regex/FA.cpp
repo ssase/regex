@@ -54,17 +54,17 @@ void FA::receive(const FASymbol symbol)
 
 }
 
-vector<Substring> FA::recognize(const string& str)
+bool FA::recognize(const string& str)
+{
+    return false;
+}
+
+vector<Substring> FA::findRecognizedSubstrings(const string& str)
 {
     return {};
 }
 
 void FA::simplify(void)
-{
-
-}
-
-void FA::completeChanging(void)
 {
 
 }
