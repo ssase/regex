@@ -258,11 +258,12 @@ void DFA::simplify(void)
     unordered_map<StateGroupInfo, FAState> newStateGroupMap;
     FAState resState;
     FAState currentStateCount = acceptStatesGroupNum + 1;
+    FASymbol symbol;
 
-    for (int i = 0; i < symbols.size(); i++) {
+    int i = 0;
+    while (i < symbols.size()) {
 
-        FASymbol symbol = symbols[i].first;
-        while (symbol <= symbols[i].second) {
+        for (symbol = symbols[i].first; symbol <= symbols[i].second; symbol++) {
 
             newStateGroupMap.clear();
 
@@ -282,10 +283,11 @@ void DFA::simplify(void)
                 }
                 currentStateCount = (FAState)newStateGroupMap.size();
 
-            } else {
-                symbol++;
+                i = -1;
+                break;
             }
         }
+        i++;
     }
 
     unordered_map<FAState, unordered_map<FASymbol, FAState>> tempTransition;

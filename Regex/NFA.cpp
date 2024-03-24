@@ -115,7 +115,6 @@ NFA::NFA(const string& pattern): NFA()
         t = *i;
     }
 
-    simplify();
 }
 
 NFA::NFA(const DFA& d): NFA(std::move(d)) {}
@@ -324,6 +323,6 @@ void NFA::resetCurrentStates(void)
 
 void NFA::simplify(void)
 {
-    *this = DFA(*this);
+    *this = NFA(DFA(*this));
 }
 
